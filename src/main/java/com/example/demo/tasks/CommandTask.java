@@ -4,6 +4,8 @@ import com.example.demo.application.TaskService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.ExecutionException;
+
 @Component
 public class CommandTask implements CommandLineRunner {
 
@@ -14,7 +16,7 @@ public class CommandTask implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws ExecutionException, InterruptedException {
         System.out.println("## CommandTask::run start. ##");
         taskService.run();
         System.out.println("## CommandTask::run end. ##");
