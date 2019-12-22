@@ -1,5 +1,6 @@
 package com.example.demo.application;
 
+import com.example.demo.application.exception.CustomException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,13 +17,29 @@ public class TaskService {
         this.asyncService = asyncService;
     }
 
-    public void run() throws InterruptedException, ExecutionException {
+    public void run() throws InterruptedException, ExecutionException, Exception {
         System.out.println("## TaskService::run start. ##");
 
-        CompletableFuture<Integer> one = asyncService.getValueAsync(1, 2000);
+        CompletableFuture<Integer> one = asyncService.getValueAsync(1, 2000)
+                .thenApplyAsync(r -> r + 100)
+                .handleAsync((r, e) -> {
+                    if (e != null) {
+                        return 0;
+                    } else {
+                        return r;
+                    }
+                });
                 one.thenAcceptAsync(r -> System.out.println("thread tasks end of value => " + r));
 
-        CompletableFuture<Integer> two = asyncService.getValueAsync(2, 3000);
+        CompletableFuture<Integer> two = asyncService.getValueAsync(3, 3000)
+                .thenApplyAsync(r -> r + 100)
+                .handleAsync((r, e) -> {
+                    if (e != null) {
+                        return 0;
+                    } else {
+                        return r;
+                    }
+                });
                 two.thenAcceptAsync(r -> System.out.println("thread tasks end of value => " + r));
 
         System.out.println("待ちスタート");
