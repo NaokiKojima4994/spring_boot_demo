@@ -1,49 +1,39 @@
 package com.example.demo.application;
 
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Service
-@EnableAsync
 public class TaskService {
 
-    public Integer getValue(Integer id) {
-        return id;
-    }
+    private AsyncService asyncService;
 
-    @Async
-    public CompletableFuture<Integer> getValueAsync(Integer id) throws InterruptedException {
-        Random rnd = new Random();
-        Integer sleepTime = rnd.nextInt(1000);
-        Thread.sleep(sleepTime);
-        System.out.println("Sleep time is " + sleepTime);
-        return CompletableFuture.completedFuture(getValue(id));
+    public TaskService(AsyncService asyncService) {
+        this.asyncService = asyncService;
     }
 
     public void run() throws InterruptedException, ExecutionException {
         System.out.println("## TaskService::run start. ##");
 
-        List<CompletableFuture<Integer>> outputs = new ArrayList<>();
+        CompletableFuture<Integer> one = asyncService.getValueAsync(1, 2000);
+                one.thenAcceptAsync(r -> System.out.println("thread tasks end of value => " + r));
 
-        for (int i = 1; i <= 10; i++) {
-            CompletableFuture<Integer> result = getValueAsync(i)
-                    .thenApply(r ->  r + 100);
-            outputs.add(result);
-        }
+        CompletableFuture<Integer> two = asyncService.getValueAsync(2, 3000);
+                two.thenAcceptAsync(r -> System.out.println("thread tasks end of value => " + r));
 
-        CompletableFuture.allOf(outputs.toArray(new CompletableFuture[0])).join();
+        System.out.println("待ちスタート");
+        CompletableFuture.allOf(one, two).join();
+        System.out.println("待ち完了");
 
-        for (CompletableFuture<Integer> task: outputs) {
-            Integer value = task.get();
-            System.out.println(value);
-        }
+        List<Integer> values = new ArrayList<>();
+        values.add(one.get());
+        values.add(two.get());
+
+        System.out.println(String.valueOf(values));
 
         System.out.println("## TaskService::run end.  ##");
     }
