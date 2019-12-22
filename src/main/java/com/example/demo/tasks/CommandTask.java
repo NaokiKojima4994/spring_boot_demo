@@ -16,7 +16,7 @@ public class CommandTask implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws ExecutionException, InterruptedException {
+    public void run(String... args) throws ExecutionException, InterruptedException, Exception {
         long start = System.currentTimeMillis();
 
         System.out.println("## CommandTask::run start. ##");
